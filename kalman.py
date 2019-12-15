@@ -57,5 +57,25 @@ c3_params, c3_pcov = curve_fit(gaussian, c3_bins[0:10], c3_hist)
 ##############################################################################################################################
 # now for Kalman filter
 
+params_dict = {'a1': a1_params, 'a2': a2_params, 'a3': a3_params, 't1': t1_params, 't2': t2_params, 't3': t3_params, 'c1': c1_params, 'c2': c2_params, 'c3': c3_params}
 
-
+def optimal_estimate(angle, texture, contrast):
+    '''
+    takes in each cue for the image and returns the optimal depth percept
+    cues must be in string form as they are in the params_dict
+    '''
+    sig_a = params_dict[angle][1]
+    d_a = params_dict[angle][2]
+    sig_t = params_dict[texture][1]
+    d_t = params_dict[angle][2]
+    sig_c = params_dict[contrast][1]
+    d_c = params_dict[angle][2]
+    
+    # first need to calculate the weights
+    w_a = (1/sig_a**2)/(1/sig_a**2 + 1/sig_t**2 + 1/sig_c**2)
+    w_t = (1/sig_t**2)/(1/sig_a**2 + 1/sig_t**2 + 1/sig_c**2)
+    w_c = (1/sig_c**2)/(1/sig_a**2 + 1/sig_t**2 + 1/sig_c**2)
+    
+    # now to calculate the optimal depth
+    d_star = w_a*d_a + w_t*d_t + w_c*d_c
+    return d_star
